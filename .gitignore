@@ -10,6 +10,7 @@
 
 # Certs
 *.cer
+*.csr
 *.key
 
 # Binaries for programs and plugins
