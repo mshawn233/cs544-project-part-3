@@ -7,11 +7,6 @@ help:
 	@echo "  Targets:"
 	@echo "	   gen-certs			Generate Certificates"
 	@echo "	   build				Build a server executable"
-	@echo "	   run					Run the server from code"
-	@echo "	   docker-server		Containerize the server"
-	@echo "	   docker-run			Run server container"
-	@echo "	   kind					Add to kind so that we can setup in ingress controller"
-	@echo "	   test-server			Test server via curl"
 
 
 .PHONY: gen-certs
@@ -25,8 +20,5 @@ gen-certs:
 
 .PHONY: build
 build:
-	go build 
-
-.PHONY: run
-run:
-	go run *.go
+	go build -o ./svr ./server/server.go 
+	go build -o ./cli ./client/client.go 
