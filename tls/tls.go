@@ -1,4 +1,4 @@
-package myproto
+package tls
 
 import (
 	"crypto/rand"
