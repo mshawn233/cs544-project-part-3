@@ -6,7 +6,8 @@ import (
 	"io"
 	"log"
 
-	"architectingsoftware.com/goquic/myproto"
+	"mshawn233/cs544-project-part-3/myproto"
+
 	"github.com/quic-go/quic-go"
 )
 
