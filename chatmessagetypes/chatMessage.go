@@ -8,10 +8,10 @@ import (
 type ChatMessage struct {
 	ChatMessageType      uint8
 	ClientChatSesstionId uint32
-	ChatMessageData      []byte
+	ChatMessageData      string
 }
 
-func NewChatMessage(clientChatSesstionId uint32, chatMessageData []byte) *ChatMessage {
+func NewChatMessage(clientChatSesstionId uint32, chatMessageData string) *ChatMessage {
 	return &ChatMessage{
 		ClientChatSesstionId: clientChatSesstionId,
 		ChatMessageData:      chatMessageData,

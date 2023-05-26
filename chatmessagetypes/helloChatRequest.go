@@ -8,13 +8,19 @@ import (
 type HelloChatRequest struct {
 	ChatMessageType      uint8
 	ClientChatSesstionId uint32
+	Username             string
+	Password             string
+	ChatPartner          string
 }
 
-func NewHelloChatRequest() *HelloChatRequest {
+func NewHelloChatRequest(username string, password string, chatPartner string) *HelloChatRequest {
 
 	return &HelloChatRequest{
 		ChatMessageType:      0x00,
 		ClientChatSesstionId: 0x00,
+		Username:             username,
+		Password:             password,
+		ChatPartner:          chatPartner,
 	}
 }
 

@@ -6,14 +6,14 @@ import (
 )
 
 type HelloChatResponse struct {
-	ChatMessageType      uint8
-	ClientChatSesstionId uint32
+	ChatMessageType     uint8
+	ClientChatSessionId uint32
 }
 
-func NewHelloChatResponse(clientChatSesstionId uint32) *HelloChatResponse {
+func NewHelloChatResponse(clientChatSessionId uint32) *HelloChatResponse {
 	return &HelloChatResponse{
-		ChatMessageType:      0x1,
-		ClientChatSesstionId: clientChatSesstionId,
+		ChatMessageType:     0x1,
+		ClientChatSessionId: clientChatSessionId,
 	}
 }
 
