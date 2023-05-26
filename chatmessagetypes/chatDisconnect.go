@@ -3,22 +3,21 @@ package chatmessagetypes
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 )
 
 type ChatDisconnect struct {
-	ChatMessageType uint8
+	ChatMessageType      uint8
 	ClientChatSesstionId uint32
 }
 
 func NewChatDisconnect(clientChatSesstionId uint32) *ChatDisconnect {
 	return &ChatDisconnect{
-		ChatMessageType: 0x3,
+		ChatMessageType:      0x3,
 		ClientChatSesstionId: clientChatSesstionId,
 	}
 }
 
-func ToBytes(cd *ChatDisconnect) ([]byte, error) {
+func ChatDisconnectToBytes(cd *ChatDisconnect) ([]byte, error) {
 	buff := bytes.Buffer{}
 	encoder := gob.NewEncoder(&buff)
 
@@ -26,7 +25,7 @@ func ToBytes(cd *ChatDisconnect) ([]byte, error) {
 	return buff.Bytes(), err
 }
 
-func FromBytes(b []byte) (*ChatDisconnect, error) {
+func ChatDisconnectFromBytes(b []byte) (*ChatDisconnect, error) {
 	buff := bytes.NewBuffer(b)
 	decoder := gob.NewDecoder(buff)
 

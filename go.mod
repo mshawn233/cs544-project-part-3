@@ -1,4 +1,4 @@
-module architectingsoftware.com/goquic
+module mshawn233/cs544-project-part-3
 
 go 1.20
 
