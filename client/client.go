@@ -128,7 +128,6 @@ func SendHelloChatMessageRequest(stream quic.Stream, username string, password s
 
 func main() {
 	c, _ := InitConnection("localhost:4242")
-	//defer c.Close()
 
 	//Read username from console
 	reader := bufio.NewReader(os.Stdin)
@@ -143,14 +142,24 @@ func main() {
 	log.Printf("Enter chat partner: ")
 	chatPartner, _ := reader.ReadString('\n')
 
+	//Use with debugger
+	/*username := "mshawn233"
+	password := "password"
+	chatPartner := "Jon"*/
+
 	SendHelloChatMessageRequest(c, username, password, chatPartner)
+
 	sessionId, _ := ReceiveHelloChatResponse(c)
 
 	//Read chat text from console
 	log.Printf("%s: ", username)
 	chatText, _ := reader.ReadString('\n')
 
+	//Use with debugger
+	//chatText := "Hello World!"
+
 	SendChatMessage(c, chatText, sessionId)
+
 	RecieveChatMessage(c)
 
 	c.Close()
