@@ -26,7 +26,7 @@ func InitServer(addr string) (quic.Connection, error) {
 	return listener.Accept(context.Background())
 }
 
-func HandleHelloChatRequest(stream quic.Stream) error {
+func HandleHelloChatRequest(stream quic.Stream, userCredentialsMap map[string]string) error {
 
 	//Read the request from the client
 	n, err := stream.Read(recvBuffer)
@@ -39,6 +39,14 @@ func HandleHelloChatRequest(stream quic.Stream) error {
 
 	pckt, _ := chatmessagetypes.HelloChatRequestFromBytes(recvBuffer[0:n])
 	log.Printf("Received request from user %s\n", pckt.Username)
+
+	//Authenticate the user
+	userAuthenticatedBool := authenticateClientUser(pckt.Username, pckt.Password, userCredentialsMap)
+
+	if !userAuthenticatedBool {
+		log.Printf("User %s failed authentication", pckt.Username)
+		return nil
+	}
 
 	//Generate HelloChatResponse
 	hcr := chatmessagetypes.NewHelloChatResponse(0x01)
@@ -87,7 +95,31 @@ func HandleChatMessage(stream quic.Stream) error {
 
 }
 
+func createUserCredentialsMap() map[string]string {
+
+	userCredentials := make(map[string]string)
+
+	userCredentials["Shawn"] = "pass1"
+	userCredentials["Jon"] = "pass2"
+	userCredentials["Steve"] = "pass3"
+
+	return userCredentials
+
+}
+
+func authenticateClientUser(username string, password string, userCredentials map[string]string) bool {
+
+	if userCredentials[username] == password {
+		return true
+	}
+
+	return false
+
+}
+
 func main() {
+
+	userCredentialsMap := createUserCredentialsMap()
 
 	c, err := InitServer("localhost:4242")
 	log.Printf("Server just initialized, error is %+v", err)
@@ -99,7 +131,7 @@ func main() {
 	}
 	log.Printf("Just Got A Connection")
 
-	HandleHelloChatRequest(stream)
+	HandleHelloChatRequest(stream, userCredentialsMap)
 
 	HandleChatMessage(stream)
 
