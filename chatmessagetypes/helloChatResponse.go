@@ -7,10 +7,10 @@ import (
 
 type HelloChatResponse struct {
 	ChatMessageType     uint8
-	ClientChatSessionId uint32
+	ClientChatSessionId uint8
 }
 
-func NewHelloChatResponse(clientChatSessionId uint32) *HelloChatResponse {
+func NewHelloChatResponse(clientChatSessionId uint8) *HelloChatResponse {
 	return &HelloChatResponse{
 		ChatMessageType:     0x1,
 		ClientChatSessionId: clientChatSessionId,
