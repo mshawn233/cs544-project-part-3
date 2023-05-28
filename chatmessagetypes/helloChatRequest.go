@@ -7,7 +7,7 @@ import (
 
 type HelloChatRequest struct {
 	ChatMessageType      uint8
-	ClientChatSesstionId uint32
+	ClientChatSesstionId uint8
 	Username             string
 	Password             string
 	ChatPartner          string
@@ -16,8 +16,8 @@ type HelloChatRequest struct {
 func NewHelloChatRequest(username string, password string, chatPartner string) *HelloChatRequest {
 
 	return &HelloChatRequest{
-		ChatMessageType:      0x00,
-		ClientChatSesstionId: 0x00,
+		ChatMessageType:      0x0,
+		ClientChatSesstionId: 0x0,
 		Username:             username,
 		Password:             password,
 		ChatPartner:          chatPartner,
