@@ -109,11 +109,7 @@ func createUserCredentialsMap() map[string]string {
 
 func authenticateClientUser(username string, password string, userCredentials map[string]string) bool {
 
-	if userCredentials[username] == password {
-		return true
-	}
-
-	return false
+	return userCredentials[username] == password
 
 }
 
