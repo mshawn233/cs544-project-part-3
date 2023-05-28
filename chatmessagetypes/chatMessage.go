@@ -7,11 +7,11 @@ import (
 
 type ChatMessage struct {
 	ChatMessageType      uint8
-	ClientChatSesstionId uint32
+	ClientChatSesstionId uint8
 	ChatMessageData      string
 }
 
-func NewChatMessage(clientChatSesstionId uint32, chatMessageData string) *ChatMessage {
+func NewChatMessage(clientChatSesstionId uint8, chatMessageData string) *ChatMessage {
 	return &ChatMessage{
 		ClientChatSesstionId: clientChatSesstionId,
 		ChatMessageData:      chatMessageData,

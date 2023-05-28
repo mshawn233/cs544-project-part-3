@@ -54,7 +54,7 @@ func RecieveChatMessage(stream quic.Stream) error {
 	return nil
 }
 
-func ReceiveHelloChatResponse(stream quic.Stream) (uint32, error) {
+func ReceiveHelloChatResponse(stream quic.Stream) (uint8, error) {
 
 	//Read the response from the server
 	n, err := stream.Read(_recvBuffer)
@@ -72,7 +72,7 @@ func ReceiveHelloChatResponse(stream quic.Stream) (uint32, error) {
 	return hcr.ClientChatSessionId, nil
 }
 
-func SendChatMessage(stream quic.Stream, msg string, chatSessionId uint32) (int, error) {
+func SendChatMessage(stream quic.Stream, msg string, chatSessionId uint8) (int, error) {
 
 	//Create new ChatMessage
 	chatmessage := chatmessagetypes.NewChatMessage(chatSessionId, msg)
