@@ -9,14 +9,13 @@ import (
 	"os"
 
 	"mshawn233/cs544-project-part-3/chatmessagetypes"
-	"mshawn233/cs544-project-part-3/myproto"
 
 	"github.com/quic-go/quic-go"
 )
 
 const MAX_PACKET_SZ = 1 << 16
 
-var _recvBuffer = make([]byte, myproto.MAX_PACKET_SZ)
+var _recvBuffer = make([]byte, MAX_PACKET_SZ)
 
 func InitConnection(host string) (quic.Stream, error) {
 
