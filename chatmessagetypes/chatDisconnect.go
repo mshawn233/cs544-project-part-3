@@ -7,10 +7,10 @@ import (
 
 type ChatDisconnect struct {
 	ChatMessageType      uint8
-	ClientChatSesstionId uint32
+	ClientChatSesstionId uint8
 }
 
-func NewChatDisconnect(clientChatSesstionId uint32) *ChatDisconnect {
+func NewChatDisconnect(clientChatSesstionId uint8) *ChatDisconnect {
 	return &ChatDisconnect{
 		ChatMessageType:      0x3,
 		ClientChatSesstionId: clientChatSesstionId,
