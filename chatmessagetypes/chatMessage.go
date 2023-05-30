@@ -13,6 +13,7 @@ type ChatMessage struct {
 
 func NewChatMessage(clientChatSesstionId uint8, chatMessageData string) *ChatMessage {
 	return &ChatMessage{
+		ChatMessageType:      0x2,
 		ClientChatSesstionId: clientChatSesstionId,
 		ChatMessageData:      chatMessageData,
 	}
