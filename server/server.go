@@ -28,9 +28,11 @@ func InitServer(addr string) (quic.Connection, error) {
 
 func HandleHelloChatRequest(stream quic.Stream, userCredentialsMap map[string]string) error {
 
+	//Create empty HelloChatResponse
+	hcr := &chatmessagetypes.HelloChatResponse{}
+
 	//Read the request from the client
 	n, err := stream.Read(recvBuffer)
-	log.Printf("Post Readfull")
 	if (err != nil) && (err != io.ErrUnexpectedEOF) {
 		log.Printf("GOT ERROR READING FROM CLIENT %+v", err)
 		return err
@@ -45,11 +47,13 @@ func HandleHelloChatRequest(stream quic.Stream, userCredentialsMap map[string]st
 
 	if !userAuthenticatedBool {
 		log.Printf("User %s failed authentication", pckt.Username)
-		return nil
+		//Generate HelloChatResponse with failed authentication
+		hcr = chatmessagetypes.NewHelloChatResponse(0x1, 0x0)
+	} else {
+		log.Printf("User %s successfully authenticated", pckt.Username)
+		//Generate HelloChatResponse with successful authentication
+		hcr = chatmessagetypes.NewHelloChatResponse(0x1, 0x1)
 	}
-
-	//Generate HelloChatResponse
-	hcr := chatmessagetypes.NewHelloChatResponse(0x01)
 
 	//Now lets convert into bytes
 	netBytes, err := chatmessagetypes.HelloChatResponseToBytes(hcr)
@@ -73,12 +77,11 @@ func HandleChatMessage(stream quic.Stream) error {
 
 	//Read the request from the client
 	n, err := stream.Read(recvBuffer)
-	log.Printf("Post Readfull")
 	if (err != nil) && (err != io.ErrUnexpectedEOF) {
 		log.Printf("GOT ERROR READING FROM CLIENT %+v", err)
 		return err
 	}
-	log.Printf("SVR: Received %d bytes", n)
+	log.Printf("Server: Received %d bytes", n)
 
 	pckt, _ := chatmessagetypes.ChatMessageFromBytes(recvBuffer[0:n])
 	log.Printf("Received chat message %s\n", pckt.ChatMessageData)
