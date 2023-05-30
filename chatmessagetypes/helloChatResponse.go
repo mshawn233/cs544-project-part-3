@@ -10,9 +10,9 @@ type HelloChatResponse struct {
 	ClientChatSessionId uint8
 }
 
-func NewHelloChatResponse(clientChatSessionId uint8) *HelloChatResponse {
+func NewHelloChatResponse(chatmessagetype uint8, clientChatSessionId uint8) *HelloChatResponse {
 	return &HelloChatResponse{
-		ChatMessageType:     0x1,
+		ChatMessageType:     chatmessagetype,
 		ClientChatSessionId: clientChatSessionId,
 	}
 }
