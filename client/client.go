@@ -71,6 +71,35 @@ func ReceiveHelloChatResponse(stream quic.Stream) (uint8, error) {
 	return hcr.ClientChatSessionId, nil
 }
 
+func SendChatDisconnect(stream quic.Stream, chatSessionId uint8) (int, error) {
+
+	//Create new ChatDisconnect
+	chatDisconnect := chatmessagetypes.NewChatDisconnect(chatSessionId)
+
+	//Convert the ChatDisconnect to bytes
+	netBytes, err := chatmessagetypes.ChatDisconnectToBytes(chatDisconnect)
+
+	//Check for errors converting to bytes
+	if err != nil {
+		log.Printf("Error serializing: %+v", err)
+		return 0, err
+	}
+
+	//Send byte array (ChatDisconnect) to the server
+	n, err := stream.Write(netBytes)
+
+	//Check for errors writing to stream
+	if err != nil {
+		log.Printf("Error writing to server: %+v", err)
+		return 0, err
+	}
+
+	log.Printf("Just wrote %d bytes to server\n", n)
+
+	return 0, nil
+
+}
+
 func SendChatMessage(stream quic.Stream, msg string, chatSessionId uint8) (int, error) {
 
 	//Create new ChatMessage
@@ -142,13 +171,15 @@ func main() {
 	chatPartner, _ := reader.ReadString('\n')
 
 	//Use with debugger
-	/*username := "mshawn233"
-	password := "password"
+	/*username := "Shawn"
+	password := "pass1"
 	chatPartner := "Jon"*/
 
 	SendHelloChatMessageRequest(c, username, password, chatPartner)
 
 	sessionId, _ := ReceiveHelloChatResponse(c)
+
+	log.Println("To end the chat session, type 'exit'")
 
 	//Read chat text from console
 	log.Printf("%s: ", username)
@@ -157,10 +188,29 @@ func main() {
 	//Use with debugger
 	//chatText := "Hello World!"
 
-	SendChatMessage(c, chatText, sessionId)
+	for {
 
-	RecieveChatMessage(c)
+		if chatText == "exit\n" {
+
+			SendChatDisconnect(c, sessionId)
+
+			c.Close()
+			<-c.Context().Done()
+			return
+
+		} else {
+
+			chatText := "Hello World!"
+
+			SendChatMessage(c, chatText, sessionId)
+
+			RecieveChatMessage(c)
+
+		}
+
+	}
 
 	c.Close()
 	<-c.Context().Done()
+
 }
