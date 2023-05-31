@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"mshawn233/cs544-project-part-3/chatmessagetypes"
+	//"mshawn233/cs544-project-part-3/helpers"
 	"mshawn233/cs544-project-part-3/tls"
 
 	"github.com/quic-go/quic-go"
@@ -57,6 +58,7 @@ func HandleHelloChatRequest(stream quic.Stream, userCredentialsMap map[string]st
 
 	//Now lets convert into bytes
 	netBytes, err := chatmessagetypes.HelloChatResponseToBytes(hcr)
+	//netBytes, err := helpers.ToBytes(hcr)
 	if err != nil {
 		log.Printf("Error serializing: %+v", err)
 		return err

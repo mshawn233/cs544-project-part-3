@@ -78,6 +78,7 @@ func SendChatDisconnect(stream quic.Stream, chatSessionId uint8) (int, error) {
 
 	//Convert the ChatDisconnect to bytes
 	netBytes, err := chatmessagetypes.ChatDisconnectToBytes(chatDisconnect)
+	//netBytes, err := helpers.ToBytes(chatDisconnect)
 
 	//Check for errors converting to bytes
 	if err != nil {
@@ -107,6 +108,7 @@ func SendChatMessage(stream quic.Stream, msg string, chatSessionId uint8) (int, 
 
 	//Convert the ChatMessage to bytes
 	netBytes, err := chatmessagetypes.ChatMessageToBytes(chatmessage)
+	//netBytes, err := helpers.ToBytes(chatmessage)
 
 	//Check for errors converting to bytes
 	if err != nil {
@@ -134,6 +136,7 @@ func SendHelloChatMessageRequest(stream quic.Stream, username string, password s
 
 	//Convert the HelloChatRequest to bytes
 	netBytes, err := chatmessagetypes.HelloChatRequestToBytes(hcr)
+	//netBytes, err := helpers.ToBytes(hcr)
 
 	//Check for errors converting to bytes
 	if err != nil {
