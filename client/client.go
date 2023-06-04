@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"mshawn233/cs544-project-part-3/chatmessagetypes"
 	"mshawn233/cs544-project-part-3/configs"
@@ -213,7 +212,6 @@ func main() {
 
 	SendChatMessage(c, chatText, sessionId)
 
-	time.Sleep(20 * time.Second)
 	RecieveChatMessage(c)
 
 	SendChatDisconnect(c, sessionId)

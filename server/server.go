@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"time"
 
 	"mshawn233/cs544-project-part-3/chatmessagetypes"
 	"mshawn233/cs544-project-part-3/configs"
@@ -143,21 +142,16 @@ func main() {
 	}
 	log.Printf("Server: Received %d bytes", n)
 
-	time.Sleep(15 * time.Second)
 	HandleHelloChatRequest(stream, n, userCredentialsMap)
 
-	//Read the request from the client
+	//Read the chat message from the client
 	n, err = stream.Read(recvBuffer)
 	if (err != nil) && (err != io.ErrUnexpectedEOF) {
 		log.Printf("GOT ERROR READING FROM CLIENT %+v", err)
 	}
 	log.Printf("Server: Received %d bytes", n)
 
-	time.Sleep(15 * time.Second)
 	HandleChatMessage(stream, n)
-
-	//Give some time for the client to respond with a ChatDisconnect
-	time.Sleep(15 * time.Second)
 
 	//This is a stream so we need to have a way for the client to have the opportunity to receive
 	//the message and then close the connection, we use context for this
