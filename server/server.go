@@ -4,9 +4,10 @@ import (
 	"context"
 	"io"
 	"log"
+	"time"
 
 	"mshawn233/cs544-project-part-3/chatmessagetypes"
-	//"mshawn233/cs544-project-part-3/helpers"
+	"mshawn233/cs544-project-part-3/helpers"
 	"mshawn233/cs544-project-part-3/tls"
 
 	"github.com/quic-go/quic-go"
@@ -57,8 +58,7 @@ func HandleHelloChatRequest(stream quic.Stream, userCredentialsMap map[string]st
 	}
 
 	//Now lets convert into bytes
-	netBytes, err := chatmessagetypes.HelloChatResponseToBytes(hcr)
-	//netBytes, err := helpers.ToBytes(hcr)
+	netBytes, err := helpers.ToBytes(hcr)
 	if err != nil {
 		log.Printf("Error serializing: %+v", err)
 		return err
@@ -132,9 +132,13 @@ func main() {
 	}
 	log.Printf("Just Got A Connection")
 
+	time.Sleep(15 * time.Second)
 	HandleHelloChatRequest(stream, userCredentialsMap)
 
-	HandleChatMessage(stream)
+	for {
+		time.Sleep(15 * time.Second)
+		HandleChatMessage(stream)
+	}
 
 	//This is a stream so we need to have a way for the client to have the opportunity to receive
 	//the message and then close the connection, we use context for this
