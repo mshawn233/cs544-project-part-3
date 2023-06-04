@@ -7,8 +7,11 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
+	"time"
 
 	"mshawn233/cs544-project-part-3/chatmessagetypes"
+	"mshawn233/cs544-project-part-3/helpers"
 
 	"github.com/quic-go/quic-go"
 )
@@ -77,8 +80,7 @@ func SendChatDisconnect(stream quic.Stream, chatSessionId uint8) (int, error) {
 	chatDisconnect := chatmessagetypes.NewChatDisconnect(chatSessionId)
 
 	//Convert the ChatDisconnect to bytes
-	netBytes, err := chatmessagetypes.ChatDisconnectToBytes(chatDisconnect)
-	//netBytes, err := helpers.ToBytes(chatDisconnect)
+	netBytes, err := helpers.ToBytes(chatDisconnect)
 
 	//Check for errors converting to bytes
 	if err != nil {
@@ -107,8 +109,7 @@ func SendChatMessage(stream quic.Stream, msg string, chatSessionId uint8) (int, 
 	chatmessage := chatmessagetypes.NewChatMessage(chatSessionId, msg)
 
 	//Convert the ChatMessage to bytes
-	netBytes, err := chatmessagetypes.ChatMessageToBytes(chatmessage)
-	//netBytes, err := helpers.ToBytes(chatmessage)
+	netBytes, err := helpers.ToBytes(chatmessage)
 
 	//Check for errors converting to bytes
 	if err != nil {
@@ -135,8 +136,7 @@ func SendHelloChatMessageRequest(stream quic.Stream, username string, password s
 	hcr := chatmessagetypes.NewHelloChatRequest(username, password, chatPartner)
 
 	//Convert the HelloChatRequest to bytes
-	netBytes, err := chatmessagetypes.HelloChatRequestToBytes(hcr)
-	//netBytes, err := helpers.ToBytes(hcr)
+	netBytes, err := helpers.ToBytes(hcr)
 
 	//Check for errors converting to bytes
 	if err != nil {
@@ -164,14 +164,17 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	log.Printf("Enter username: ")
 	username, _ := reader.ReadString('\n')
+	username = strings.TrimRight(username, "\r\n")
 
 	//Read password from console
 	log.Printf("Enter password: ")
 	password, _ := reader.ReadString('\n')
+	password = strings.TrimRight(password, "\r\n")
 
 	//Read chat partner username from console
 	log.Printf("Enter chat partner: ")
 	chatPartner, _ := reader.ReadString('\n')
+	chatPartner = strings.TrimRight(chatPartner, "\r\n")
 
 	//Use with debugger
 	/*username := "Shawn"
@@ -187,13 +190,14 @@ func main() {
 	//Read chat text from console
 	log.Printf("%s: ", username)
 	chatText, _ := reader.ReadString('\n')
+	chatText = strings.TrimRight(chatText, "\r\n")
 
 	//Use with debugger
 	//chatText := "Hello World!"
 
 	for {
 
-		if chatText == "exit\n" {
+		if chatText == "exit" {
 
 			SendChatDisconnect(c, sessionId)
 
@@ -203,17 +207,19 @@ func main() {
 
 		} else {
 
-			chatText := "Hello World!"
+			//chatText := "Hello World!"
 
 			SendChatMessage(c, chatText, sessionId)
+			time.Sleep(20 * time.Second)
 
 			RecieveChatMessage(c)
 
 		}
 
-	}
+		log.Printf("%s: ", username)
+		chatText, _ = reader.ReadString('\n')
+		chatText = strings.TrimRight(chatText, "\r\n")
 
-	c.Close()
-	<-c.Context().Done()
+	}
 
 }
