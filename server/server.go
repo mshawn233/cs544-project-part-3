@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"log"
+	"os"
 	"time"
 
 	"mshawn233/cs544-project-part-3/chatmessagetypes"
+	"mshawn233/cs544-project-part-3/configs"
 	"mshawn233/cs544-project-part-3/helpers"
 	"mshawn233/cs544-project-part-3/tls"
 
@@ -17,8 +20,25 @@ const MAX_PACKET_SZ = 1 << 16
 
 var recvBuffer = make([]byte, MAX_PACKET_SZ)
 
-func InitServer(addr string) (quic.Connection, error) {
+func InitServer() (quic.Connection, error) {
 	log.Printf("Server is initializing")
+
+	//Read the config file
+	file, err := os.ReadFile("../configs/config.json")
+	if err != nil {
+		return nil, err
+	}
+
+	//Get the host and port from the config file
+	var config configs.Config
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	//Create the address string
+	var addr string = config.Host + ":" + config.Port
+
 	listener, err := quic.ListenAddr(addr, tls.GenerateTLSConfig(), nil)
 	if err != nil {
 		return nil, err
@@ -28,20 +48,12 @@ func InitServer(addr string) (quic.Connection, error) {
 	return listener.Accept(context.Background())
 }
 
-func HandleHelloChatRequest(stream quic.Stream, userCredentialsMap map[string]string) error {
+func HandleHelloChatRequest(stream quic.Stream, bytesRead int, userCredentialsMap map[string]string) error {
 
 	//Create empty HelloChatResponse
 	hcr := &chatmessagetypes.HelloChatResponse{}
 
-	//Read the request from the client
-	n, err := stream.Read(recvBuffer)
-	if (err != nil) && (err != io.ErrUnexpectedEOF) {
-		log.Printf("GOT ERROR READING FROM CLIENT %+v", err)
-		return err
-	}
-	log.Printf("SVR: Received %d bytes", n)
-
-	pckt, _ := chatmessagetypes.HelloChatRequestFromBytes(recvBuffer[0:n])
+	pckt, _ := chatmessagetypes.HelloChatRequestFromBytes(recvBuffer[0:bytesRead])
 	log.Printf("Received request from user %s\n", pckt.Username)
 
 	//Authenticate the user
@@ -65,7 +77,7 @@ func HandleHelloChatRequest(stream quic.Stream, userCredentialsMap map[string]st
 	}
 
 	//Send response to the client
-	n, err = stream.Write(netBytes)
+	n, err := stream.Write(netBytes)
 	if err != nil {
 		log.Printf("Error writing to client: %+v", err)
 		return err
@@ -75,21 +87,13 @@ func HandleHelloChatRequest(stream quic.Stream, userCredentialsMap map[string]st
 	return nil
 }
 
-func HandleChatMessage(stream quic.Stream) error {
+func HandleChatMessage(stream quic.Stream, bytesRead int) error {
 
-	//Read the request from the client
-	n, err := stream.Read(recvBuffer)
-	if (err != nil) && (err != io.ErrUnexpectedEOF) {
-		log.Printf("GOT ERROR READING FROM CLIENT %+v", err)
-		return err
-	}
-	log.Printf("Server: Received %d bytes", n)
-
-	pckt, _ := chatmessagetypes.ChatMessageFromBytes(recvBuffer[0:n])
+	pckt, _ := chatmessagetypes.ChatMessageFromBytes(recvBuffer[0:bytesRead])
 	log.Printf("Received chat message %s\n", pckt.ChatMessageData)
 
 	//Send response to the client
-	n, err = stream.Write(recvBuffer[0:n])
+	n, err := stream.Write(recvBuffer[0:bytesRead])
 	if err != nil {
 		log.Printf("Error writing to client: %+v", err)
 		return err
@@ -122,7 +126,7 @@ func main() {
 
 	userCredentialsMap := createUserCredentialsMap()
 
-	c, err := InitServer("localhost:4242")
+	c, err := InitServer()
 	log.Printf("Server just initialized, error is %+v", err)
 
 	log.Printf("Server is waiting for a connection")
@@ -132,16 +136,32 @@ func main() {
 	}
 	log.Printf("Just Got A Connection")
 
-	time.Sleep(15 * time.Second)
-	HandleHelloChatRequest(stream, userCredentialsMap)
-
-	for {
-		time.Sleep(15 * time.Second)
-		HandleChatMessage(stream)
+	//Read the request from the client
+	n, err := stream.Read(recvBuffer)
+	if (err != nil) && (err != io.ErrUnexpectedEOF) {
+		log.Printf("GOT ERROR READING FROM CLIENT %+v", err)
 	}
+	log.Printf("Server: Received %d bytes", n)
+
+	time.Sleep(15 * time.Second)
+	HandleHelloChatRequest(stream, n, userCredentialsMap)
+
+	//Read the request from the client
+	n, err = stream.Read(recvBuffer)
+	if (err != nil) && (err != io.ErrUnexpectedEOF) {
+		log.Printf("GOT ERROR READING FROM CLIENT %+v", err)
+	}
+	log.Printf("Server: Received %d bytes", n)
+
+	time.Sleep(15 * time.Second)
+	HandleChatMessage(stream, n)
+
+	//Give some time for the client to respond with a ChatDisconnect
+	time.Sleep(15 * time.Second)
 
 	//This is a stream so we need to have a way for the client to have the opportunity to receive
 	//the message and then close the connection, we use context for this
+	log.Printf("Server: Closing connection with client")
 	connCtx := c.Context()
 	<-connCtx.Done()
 

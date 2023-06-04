@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"io"
 	"log"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"mshawn233/cs544-project-part-3/chatmessagetypes"
+	"mshawn233/cs544-project-part-3/configs"
 	"mshawn233/cs544-project-part-3/helpers"
 
 	"github.com/quic-go/quic-go"
@@ -20,7 +22,7 @@ const MAX_PACKET_SZ = 1 << 16
 
 var _recvBuffer = make([]byte, MAX_PACKET_SZ)
 
-func InitConnection(host string) (quic.Stream, error) {
+func InitConnection() (quic.Stream, error) {
 
 	//Initialize TLS config
 	tlsConf := &tls.Config{
@@ -28,8 +30,24 @@ func InitConnection(host string) (quic.Stream, error) {
 		NextProtos:         []string{"quic-security-setup"},
 	}
 
+	//Read the config file
+	file, err := os.ReadFile("../configs/config.json")
+	if err != nil {
+		return nil, err
+	}
+
+	//Get the host and port from the config file
+	var config configs.Config
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	//Create the address string
+	var addr string = config.Host + ":" + config.Port
+
 	//Dial the server
-	conn, err := quic.DialAddr(host, tlsConf, nil)
+	conn, err := quic.DialAddr(addr, tlsConf, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +176,7 @@ func SendHelloChatMessageRequest(stream quic.Stream, username string, password s
 }
 
 func main() {
-	c, _ := InitConnection("localhost:4242")
+	c, _ := InitConnection()
 
 	//Read username from console
 	reader := bufio.NewReader(os.Stdin)
@@ -185,8 +203,6 @@ func main() {
 
 	sessionId, _ := ReceiveHelloChatResponse(c)
 
-	log.Println("To end the chat session, type 'exit'")
-
 	//Read chat text from console
 	log.Printf("%s: ", username)
 	chatText, _ := reader.ReadString('\n')
@@ -195,31 +211,14 @@ func main() {
 	//Use with debugger
 	//chatText := "Hello World!"
 
-	for {
+	SendChatMessage(c, chatText, sessionId)
 
-		if chatText == "exit" {
+	time.Sleep(20 * time.Second)
+	RecieveChatMessage(c)
 
-			SendChatDisconnect(c, sessionId)
+	SendChatDisconnect(c, sessionId)
 
-			c.Close()
-			<-c.Context().Done()
-			return
-
-		} else {
-
-			//chatText := "Hello World!"
-
-			SendChatMessage(c, chatText, sessionId)
-			time.Sleep(20 * time.Second)
-
-			RecieveChatMessage(c)
-
-		}
-
-		log.Printf("%s: ", username)
-		chatText, _ = reader.ReadString('\n')
-		chatText = strings.TrimRight(chatText, "\r\n")
-
-	}
+	c.Close()
+	<-c.Context().Done()
 
 }
